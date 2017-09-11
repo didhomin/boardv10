@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wdfall.dao.BoardDao">
+    <select id="list" parameterType="java.util.Map" resultType="boardDto">
+        select b.*
+        from (
+        	select rownum rn, a.*
+        	from (
+        		select b.board_seq boardSeq ,
+        		       b.subject ,
+        		       b.insertdate insertDate ,
+        		       b.updatedate updatedate ,
+        		       m.id id
+        		from board b,member m
+        		where b.member_seq=m.member_seq
+        		order by board_seq desc
+        		) a
+        	where rownum &lt;=#{end}
+        	) b
+        where b.rn&gt;#{start}
+    </select>
+    
+    <insert id="write" parameterType="boardDto">
+        insert into
+        board (board_seq,member_seq,subject,content,insertDate,updateDate)
+        values (seq_board.nextval,#{memberSeq},#{subject},#{content},sysdate,sysdate)
+    </insert>
+    
+    <select id="view" parameterType="String" resultType="boardDto">
+        select b.board_seq boardSeq ,
+                b.subject ,
+                b.content ,
+                b.insertdate insertDate ,
+                b.updatedate updatedate ,
+                m.id id
+        from board b,member m
+        where b.member_seq=m.member_seq
+        and b.board_seq=#{seq}
+    </select>
+    
+    <delete id="delete" parameterType="String">
+        delete 
+        from board
+        where board_seq=#{seq}
+    </delete>
+    
+    <update id="modify" parameterType="boardDto">
+        update board
+        set	subject=#{subject} , 
+            content=#{content} , 
+            updatedate=sysdate
+        where board_seq=#{boardSeq}
+    </update>
+</mapper>

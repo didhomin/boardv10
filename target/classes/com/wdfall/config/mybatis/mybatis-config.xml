@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+ 
+<configuration>
+
+        <typeAliases>
+                <typeAlias alias="boardDto" type="com.wdfall.dto.BoardDto"/>
+                <typeAlias alias="memberDto" type="com.wdfall.dto.MemberDto"/>
+        </typeAliases>
+        
+        <mappers>
+                <mapper resource="com/wdfall/config/mybatis/member.xml"/>
+                <mapper resource="com/wdfall/config/mybatis/board.xml"/>
+        </mappers>
+</configuration>

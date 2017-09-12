@@ -165,8 +165,6 @@ public class BoardController {
 		  
 	        OutputStream out = null;
 	        PrintWriter printWriter = null;
-	        response.setCharacterEncoding("utf-8");
-	        response.setContentType("text/html;charset=utf-8");
 	 
 	        try{
 	 

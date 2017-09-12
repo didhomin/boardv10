@@ -9,7 +9,10 @@ public class BoardDto {
 	 * id 글쓴이아이디
 	 * content 글내용
 	 * insertDate 등록일시
-	 * updateDate 수정일시*/
+	 * updateDate 수정일시
+	 * hit 조회수
+	 * secret 공개유무
+	 * recommend 추천수*/
 	private String boardSeq;
 	private String id;
 	private String memberSeq;
@@ -17,7 +20,28 @@ public class BoardDto {
 	private String content;
 	private String insertDate;
 	private String updateDate;
+	private String hit;
+	private String secret;
+	private String recommend;
 	
+	public String getHit() {
+		return hit;
+	}
+	public void setHit(String hit) {
+		this.hit = hit;
+	}
+	public String getSecret() {
+		return secret;
+	}
+	public void setSecret(String secret) {
+		this.secret = secret;
+	}
+	public String getRecommend() {
+		return recommend;
+	}
+	public void setRecommend(String recommend) {
+		this.recommend = recommend;
+	}
 	public String getMemberSeq() {
 		return memberSeq;
 	}

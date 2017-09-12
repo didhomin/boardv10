@@ -11,7 +11,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
 var isLogin='${not empty memberInfo}';
-$(document).on('click','#headerLogin', function () {
+var loginId='${memberInfo.id}';
+function headerLogin() {
 var id = $('#headerId').val();
 var password = $('#headerPassword').val();
 $.ajax({
@@ -23,6 +24,7 @@ $.ajax({
 	},
 	success : function(data) {
 		if(data.isLogin=="success") {
+			loginId=id;
 			if("${not empty uri}" =="true") {
 				$(location).attr('href','${uri}');
 			}
@@ -42,19 +44,26 @@ $.ajax({
 		}
 	}
 });
+}
+function headerLogout(){
+$.ajax({
+	type : 'GET',
+	url : '${root}/logout',
+	success : function(data) {
+		$('.fail').show();
+		$('#headerId').val('');
+		$('#headerPassword').val('');
+		$('.success').hide();
+		isLogin='false';
+		loginId='';
+	}
+});
+}
+$(document).on('click','#headerLogin', function () {
+	headerLogin();
 });
 $(document).on('click','#headerLogout', function () {
-	$.ajax({
-		type : 'GET',
-		url : '${root}/logout',
-		success : function(data) {
-			$('.fail').show();
-			$('#headerId').val('');
-			$('#headerPassword').val('');
-			$('.success').hide();
-			isLogin="false";
-		}
-	});
+	headerLogout();
 });
 </script>
 <title>Insert title here</title>

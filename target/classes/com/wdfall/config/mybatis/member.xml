@@ -7,9 +7,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.wdfall.dao.MemberDao">
     
     <select id="login" parameterType="memberDto" resultType="memberDto">
-        select member_seq memberSeq, id, password
-        from member
-        where id=#{id} and password=#{password}
+        SELECT member_seq memberSeq, id, password
+        FROM member
+        WHERE id=#{id} 
+        AND password=#{password}
     </select>
     
 </mapper>

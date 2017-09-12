@@ -2,6 +2,7 @@
     pageEncoding="UTF-8" %>
 
 <%@ include file="/WEB-INF/page/header.jsp" %>
+<script src="${root }/ckeditor/ckeditor.js"></script>
 <c:if test="${empty memberInfo}">
 <script type="text/javascript">	
 $(window).on('load', function(){
@@ -20,11 +21,11 @@ function registerOk(){
 			} else if($('#subject').val().length >80) {
 				alert("제목은 80글자 이내로 작성해 주세요!");
 				return;
-			} else if($('#content').val() == "") {
+			} else if(CKEDITOR.instances.content.getData() == "") {
 				alert("내용을 입력하세요!");
 				return;
 			} else {
-				$('#modifyForm').attr('action', '${root}/writeSave').submit();
+				$('#writeSave').attr('action', '${root}/writeSave').submit();
 			}
 		}
 	} else {
@@ -48,8 +49,21 @@ function cancelOk(){
 	
 	<label for="content">내용</label>
 	<textarea class="form-control" id="content" name="content"></textarea>
-	
-	<div class="col-sm-1 col-sm-offset-10">
+            <script>
+                // Replace the <textarea id="editor1"> with a CKEditor
+                // instance, using default configuration.
+                CKEDITOR.replace( 'content', {
+				    filebrowserUploadUrl: '${root}/upload'
+				});
+            </script>
+      
+	<input class="form-control" type="file" name="picture">
+	<input class="form-control" type="file" name="picture">
+	<input class="form-control" type="file" name="picture">
+	<div class="col-sm-2 col-sm-offset-8">
+		비공개글<input name="secret" type="checkbox" value="1">
+	</div>
+	<div class="col-sm-1">
 		<button type="button" class="btn btn-primary pull-right" onclick="javascript:registerOk();">저장</button>
 	</div>
 	<div class="col-sm-1"> 

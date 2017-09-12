@@ -1,10 +1,19 @@
 package com.wdfall.controller;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,10 +21,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.UrlPathHelper;
 
 import com.wdfall.dto.BoardDto;
+import com.wdfall.dto.MemberDto;
 import com.wdfall.service.BoardService;
 
 @Controller
@@ -36,8 +46,9 @@ public class BoardController {
 	 * @return boardList JSON
 	 */
 	@RequestMapping("/loadList")
-	public @ResponseBody List<BoardDto> loadList(@RequestParam(value="pg",defaultValue="1") int pg) {
-		List<BoardDto> boardList = boardService.list(pg);
+	@ResponseBody
+	public List<BoardDto> loadList(@RequestParam(value="page",defaultValue="1") int page) {
+		List<BoardDto> boardList = boardService.list(page);
 		return boardList;
 	}
 	/**글작성페이지로 이동
@@ -52,7 +63,8 @@ public class BoardController {
 	 * @return jsp경로
 	 */
 	@RequestMapping("/writeSave")
-	public String writeSave(BoardDto boardDto) {
+	public String writeSave(BoardDto boardDto,@RequestParam(value="secret",defaultValue="0") String secret) {
+		boardDto.setSecret(secret);
 		boardService.write(boardDto);
 		return "/WEB-INF/page/list";
 	}
@@ -114,11 +126,31 @@ public class BoardController {
 	 * @param seq 글번호
 	 * @return jsp경로
 	 */
-	@RequestMapping(value="/delete/{boardSeq}")
-	public String delete(@PathVariable String boardSeq) {
-		
-		boardService.delete(boardSeq);
-		return "redirect:/list";
+	@RequestMapping(value="/delete/ {boardSeq}",method=RequestMethod.DELETE)
+	@ResponseBody
+	public Map<String, String> delete(@PathVariable String boardSeq, HttpSession session) {
+		Map<String, String> map = new HashMap<String,String>();
+//		String writerId = boardService.view(boardSeq).getId();
+		MemberDto memberDto = (MemberDto) session.getAttribute("memberInfo");
+		if(memberDto!=null) {
+			boardService.delete(boardSeq);
+			map.put("isDelete", "success");
+		} else {
+			map.put("isDelete", "fail");
+		}
+		return map;
+	}
+	@RequestMapping(value="/recommend")
+	@ResponseBody
+	public Map<String,String> recommend(BoardDto boardDto) {
+		Map<String,String> map = new HashMap<String,String>();
+		int isRecommend = boardService.recommend(boardDto);
+		if(isRecommend==1) {
+			map.put("isRecommend", "success");
+		} else {
+			map.put("isRecommend", "fail");
+		}
+		return map;
 	}
 	public static boolean isNum(String tmp) {
 		  try {
@@ -128,4 +160,51 @@ public class BoardController {
 		      return false;
 		  }
 	}
+	  @RequestMapping(value = "/upload", method = RequestMethod.POST)
+	    public void communityImageUpload(HttpServletRequest request, HttpServletResponse response, @RequestParam MultipartFile upload) {
+		  
+	        OutputStream out = null;
+	        PrintWriter printWriter = null;
+	        response.setCharacterEncoding("utf-8");
+	        response.setContentType("text/html;charset=utf-8");
+	 
+	        try{
+	 
+	            String fileName = upload.getOriginalFilename();
+	            String realPath = request.getServletContext().getRealPath("/ckeditor");
+	            byte[] bytes = upload.getBytes();
+	            String uploadPath =  realPath + File.separator + "/plugins/image/images/" +  fileName;//저장경로
+	 
+	            out = new FileOutputStream(new File(uploadPath));
+	            out.write(bytes);
+	            String callback = request.getParameter("CKEditorFuncNum");
+	 
+	            printWriter = response.getWriter();
+	            String fileUrl = request.getContextPath()+"/ckeditor/plugins/image/images/" + fileName;//url경로
+	 
+	            printWriter.println("<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction("
+	                    + callback
+	                    + ",'"
+	                    + fileUrl
+	                    + "','이미지를 업로드 하였습니다.'"
+	                    + ")</script>");
+	            printWriter.flush();
+	 
+	        }catch(IOException e){
+	            e.printStackTrace();
+	        } finally {
+	            try {
+	                if (out != null) {
+	                    out.close();
+	                }
+	                if (printWriter != null) {
+	                    printWriter.close();
+	                }
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	 
+	        return;
+	    }
 }

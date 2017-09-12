@@ -10,7 +10,7 @@ $(window).on('load', function(){
 </script>
 </c:if>
 <script type="text/javascript">
-var pg =1;
+var page =1;
 $(document).ready(function(){
 	request();
 });
@@ -18,7 +18,7 @@ function request() {
 	$.ajax({
 		type : 'GET',
 		dataType : 'json',
-		data : {'pg' : pg++},
+		data : {'page' : page++},
 		url : '${root}/loadList',
 		success : function(data) {
 			var output ='';
@@ -26,9 +26,20 @@ function request() {
 				output += '<tr class="view">';		
 				output += 	'<td>'+data[i].boardSeq+'</td>';
 				output += 	'<td>'+data[i].id+'</td>';
-				output += 	'<td>'+data[i].subject+'</td>';
+				if(data[i].secret=="1") {
+					if(loginId==data[i].id) {
+						output += 	'<td>'+data[i].subject+'</td>';
+					}
+					else {
+						output += 	'<td>비공개글입니다.</td>';
+					}
+				} else {
+					output += 	'<td>'+data[i].subject+'</td>';
+				}
 				output += 	'<td>'+data[i].insertDate+'</td>';
 				output += 	'<td>'+data[i].updateDate+'</td>';
+				output += 	'<td>'+data[i].hit+'</td>';
+				output += 	'<td>'+data[i].recommend+'</td>';
 				output += '</tr>';
 			}
 			$('#boardListView').append(output);
@@ -38,12 +49,23 @@ function request() {
 		}
 	});
 }
+function reload() {
+	$('#boardListView').text('');
+	page=1
+	request();
+}
 $(document).on('click','#loadList', function () {
 	request();
 });
 $(document).on('click','.view', function () {
 	var seq = $(this).children().eq(0).text();
 	$(location).attr('href','${root}/view/'+seq);
+});
+$(document).on('click','#headerLogout', function () {
+	reload();
+});
+$(document).on('click','#headerLogin', function () {
+	reload();
 });
 </script>
 
@@ -56,6 +78,8 @@ $(document).on('click','.view', function () {
 				<th>제목</th>
 				<th>등록일</th>
 				<th>수정일</th>
+				<th>조회수</th>
+				<th>추천수</th>
 			</tr>
 		</thead>
 		<tbody id="boardListView">

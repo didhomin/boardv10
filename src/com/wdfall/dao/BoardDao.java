@@ -10,8 +10,12 @@ import com.wdfall.dto.BoardDto;
 @Repository
 public interface BoardDao {
 	List<BoardDto> list(Map<String,String> map);
-	BoardDto view(String seq);
+	BoardDto view(String boardSeq);
 	void write(BoardDto boardDto);
 	void modify(BoardDto boardDto);
-	void delete(String seq);
+	int delete(String boardSeq);
+	void hit(String boardSeq);
+	int recommend(BoardDto boardDto);
+	int isRecommend(BoardDto boardDto);
+	void recommendCount(String boardSeq);
 }

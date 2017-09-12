@@ -6,53 +6,91 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <mapper namespace="com.wdfall.dao.BoardDao">
     <select id="list" parameterType="java.util.Map" resultType="boardDto">
-        select b.*
-        from (
-        	select rownum rn, a.*
-        	from (
-        		select b.board_seq boardSeq ,
+        SELECT b.*
+        FROM (
+        	SELECT rownum rn, a.*
+        	FROM (
+        		SELECT b.board_seq boardSeq ,
         		       b.subject ,
         		       b.insertdate insertDate ,
         		       b.updatedate updatedate ,
+        		       b.hit hit,
+        		       b.secret secret,
+        		       b.recommend recommend,
         		       m.id id
-        		from board b,member m
-        		where b.member_seq=m.member_seq
-        		order by board_seq desc
+        		FROM board b,member m
+        		WHERE b.member_seq=m.member_seq
+        		ORDER BY board_seq DESC
         		) a
-        	where rownum &lt;=#{end}
+        		WHERE rownum &lt;=#{end}
         	) b
-        where b.rn&gt;#{start}
+        	WHERE b.rn&gt;#{start}
     </select>
     
     <insert id="write" parameterType="boardDto">
-        insert into
-        board (board_seq,member_seq,subject,content,insertDate,updateDate)
-        values (seq_board.nextval,#{memberSeq},#{subject},#{content},sysdate,sysdate)
+        INSERT INTO
+        board (board_seq,member_seq,subject,content,insertDate,updateDate,
+                hit,secret,recommend)
+        VALUES (seq_board.nextval,#{memberSeq},#{subject},#{content},sysdate,sysdate,
+                0,#{secret},0)
     </insert>
     
     <select id="view" parameterType="String" resultType="boardDto">
-        select b.board_seq boardSeq ,
+        SELECT b.board_seq boardSeq ,
                 b.subject ,
                 b.content ,
                 b.insertdate insertDate ,
                 b.updatedate updatedate ,
+                b.hit hit,
+                b.secret secret,
+                b.recommend recommend,
                 m.id id
-        from board b,member m
-        where b.member_seq=m.member_seq
-        and b.board_seq=#{seq}
+        FROM board b,member m
+        WHERE b.member_seq=m.member_seq
+        AND b.board_seq=#{boardSeq}
     </select>
     
     <delete id="delete" parameterType="String">
-        delete 
-        from board
-        where board_seq=#{seq}
+        DELETE 
+        FROM board
+        WHERE board_seq=#{boardSeq}
     </delete>
     
     <update id="modify" parameterType="boardDto">
-        update board
-        set	subject=#{subject} , 
+        UPDATE board
+        SET	subject=#{subject} , 
             content=#{content} , 
-            updatedate=sysdate
-        where board_seq=#{boardSeq}
+            updatedate=sysdate,
+        <choose>
+            <when test="secret==1">
+                secret=1
+            </when>
+            <otherwise>
+                secret=0
+            </otherwise>
+        </choose>
+        WHERE board_seq=#{boardSeq}
     </update>
+    <update id="hit" parameterType="String">
+        UPDATE board
+        SET	hit=hit+1
+        WHERE board_seq=#{boardSeq}
+    </update>
+    <update id="recommendCount" parameterType="String">
+        UPDATE board
+        SET	recommend=recommend+1
+        WHERE board_seq=#{boardSeq}
+    </update>
+    <insert id="recommend" parameterType="boardDto">
+        INSERT INTO
+        recommend (recommend_seq,member_seq,board_seq)
+        VALUES (seq_recommend.nextval,#{memberSeq},#{boardSeq})
+    </insert>
+    <select id="isRecommend" resultType="int" parameterType="boardDto">
+        SELECT count(*)
+        FROM recommend
+        WHERE member_seq=#{memberSeq} 
+        AND board_seq=#{boardSeq}
+    </select>
+    
 </mapper>
